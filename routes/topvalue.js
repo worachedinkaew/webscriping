@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
 });
 
 //GET Product By Brand
-router.get('/:category/:sub_category/:brand', function (req, res) {
+router.get('/:category/:sub_category/:brand', function (req, res, next) {
 
     let category = req.params.category;
 	let sub_category = req.params.sub_category;
@@ -57,11 +57,7 @@ router.get('/:category/:sub_category/:brand', function (req, res) {
 			// 	console.log('file saved');
 			// });
 
-     		res.send({
- 				Product: item,
- 				Quantity: count_product
- 			});
-
+        res.render('topvalue', {result: item});
      		console.log(prettyjson.render(item));
      		console.log("Quantity Product : " , count_product);
 		} 

@@ -1,9 +1,17 @@
-objects = [[obj0, obj1, obj2], [obj3, obj4, obj5]]
 
-table
-  thead
-  tbody
-  for object in objects
-    tr
-      for subobject in object
-        td= subobject
+doctype html
+html(lang="en")
+	head
+		div: div: h3 Hello
+
+	body
+		div
+			table
+				thead
+					tr
+						th	Name
+						th  Price
+				tbody
+						tr
+							td= "test"
+							td= "100"

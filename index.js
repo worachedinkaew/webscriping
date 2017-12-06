@@ -1,22 +1,90 @@
-//var Hapi = require('hapi');
-var request = require('request');
-var cheerio = require('cheerio');
+var app	= require('express')();
+
+const Hapi = require('hapi');
+const request = require('request');
+const cheerio = require('cheerio');
 var json2csv = require('json2csv');
 var fs = require('fs');
 var bodyParser = require('body-parser');
 var prettyjson = require('prettyjson');
 
-var express = require('express');
-var router = express.Router();
+var port = process.env.PORT || 7777;
 
-var advice = 'http://www.advice.co.th/product';
+// parse application/json
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
 
-router.get('/', function(req, res, next) {
-    res.render('advice', {title: 'ADVICE'})
+//website
+const playstore = 'http://play.google.com/store/apps/details?id=';
+const topvalue = 'http://www.topvalue.me';
+const advice = 'http://www.advice.co.th/product';
+
+
+app.get('/', function (req, res) {
+    res.send('<h1>Test Test</h1>');
+});
+
+//GET Product By Brand
+app.get('/topvalue/:category/:sub_category/:brand', function (req, res) {
+
+    let category = req.params.category;
+	let sub_category = req.params.sub_category;
+	let brand = req.params.brand;
+	let url = `${topvalue}/${category}/${sub_category}/${brand}`;
+    
+	console.log(url);
+
+	var item = [];
+
+    request(url, (err, response, body) => {
+
+    	if (!err && response.statusCode === 200) {
+
+        	var $ = cheerio.load(body);	
+        	var count_product = 0;	
+
+     		$('div.product-info').each(function(){
+     			var name = $(this).find('h2.product-name a').text();
+     			var special_price = $(this).find('.special-price .price').text().trim();
+     			var regular_price = $(this).find('.regular-price .price').text().trim();
+
+     			var temp = {	
+     				Name: name,
+     				Special_Price: special_price,
+     				Regular_Price: regular_price
+     			};
+     			
+     			item.push(temp);
+     			count_product++;
+     		});
+
+			// var csv = json2csv({ data: item});
+			// var path = './CSV/'+'topvalue'+Date.now()+'.csv';
+			// fs.writeFile(path, csv, function(err) {
+			// 	if (err) throw err;
+			// 	console.log('file saved');
+			// });
+
+     		res.send({
+ 				Product: item,
+ 				Quantity: count_product
+ 			});
+
+     		console.log(prettyjson.render(item));
+     		console.log("Quantity Product : " , count_product);
+		} 
+		else {
+	        res.send({
+	          message: `We're sorry, the requested ${url} was not found on this server.`
+	        });
+    	}
+	});
 });
 
 //GET Product By Category
-router.get('/:category', function (req, res) {
+app.get('/advice/:category', function (req, res) {
     let category = req.params.category;
 	let product = req.params.product;
     let url = `${advice}/${category}`;
@@ -52,7 +120,10 @@ router.get('/:category', function (req, res) {
 					// console.log('File Saved Complete');
      // 		});
 
-     		res.render('advice', {result: item});
+     		res.send({
+     				Product: item,
+     				Quantity: count_product
+     			});
 
      		console.log(prettyjson.render(item));
      		console.log("Quantity Product : " , count_product);
@@ -66,7 +137,7 @@ router.get('/:category', function (req, res) {
 });
 
 //GET Product In Category By Brand
-router.get('/:category/:brand', function (req, res) {
+app.get('/advice/:category/:brand', function (req, res) {
     let category = req.params.category;
 	let brand = req.params.brand;
     let url = `${advice}/${category}/${brand}`;
@@ -102,7 +173,10 @@ router.get('/:category/:brand', function (req, res) {
 					// console.log('File Saved Complete');
      // 		});
 
-     		res.render('advice', {result: item});
+     		res.send({
+     				Product: item,
+     				Quantity: count_product
+     			});
 
      		console.log(prettyjson.render(item));
      		console.log("Quantity Product : " , count_product);
@@ -115,4 +189,7 @@ router.get('/:category/:brand', function (req, res) {
 	});
 });
 
-module.exports = router;
+
+app.listen(port, function() {
+    console.log('Starting node.js on port ' + port);
+});

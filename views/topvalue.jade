@@ -1,4 +1,23 @@
 
-block content
-	h1= title
-	p Welcome to #{title}
+doctype html
+html(lang="en")
+	head
+		title Top Value
+		div: div: h3 Product List
+
+	body
+
+		table(border='1')
+			thead
+				tr
+					th  ลำดับ
+					th  Name
+					th  Special_Price
+					th  Regular_Price
+			tbody
+				each item, i in result
+					tr
+						td= i+1 
+						td= item.Name
+						td= item.Special_Price
+						td= item.Regular_Price
